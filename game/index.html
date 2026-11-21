@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Solis</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #0b0d12; }
+  #game { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+  /* Read aloud, never shown: the status line screen readers announce. */
+  #status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+</style>
+</head>
+<body>
+<canvas id="game" aria-label="Solis: an open-city crime game. Move with WASD or the arrow keys, E to jack or leave a car, Space to fire, P to pause."></canvas>
+<p id="status" role="status" aria-live="polite"></p>
+<script>
+  // A crash shows up on the canvas itself, in place of a silent black screen: a module error
+  // (a bad import, a thrown exception before the first frame) would otherwise leave nothing to
+  // debug from a screenshot alone.
+  window.addEventListener('error', (event) => paintCrash(event.error || event.message));
+  window.addEventListener('unhandledrejection', (event) => paintCrash(event.reason));
+  function paintCrash(error) {
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth || 1280;
+    canvas.height = window.innerHeight || 720;
+    ctx.fillStyle = '#2a0e12';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#ff8a65';
+    ctx.font = '16px monospace';
+    ctx.textBaseline = 'top';
+    const text = String((error && error.stack) || error || 'unknown error');
+    const lines = text.split('\n');
+    for (let i = 0; i < lines.length && i < 30; i += 1) ctx.fillText(lines[i], 16, 16 + i * 20);
+  }
+</script>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
